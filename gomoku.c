@@ -59,20 +59,40 @@ int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMat
 	int primeiraLinha  = numPecas - 1;
 	int ultimaColuna = tamMatriz - (numPecas - 1);
 	
-	
+	int contou = 0;
 	int coluna = 0;
-	
-	for(i = primeiraLinha; i < tamMatriz; i++){
+	i = primeiraLinha;
+	j = 0;
+		
+	//for(i = primeiraLinha; i < tamMatriz; i++){
+	while(i < tamMatriz && j < tamMatriz){
 		int linha = i;
-		while(linha > 0 && coluna <= linha){
-			int posicao = matriz[linha][coluna];
+		coluna = j;
+		if(i == tamMatriz - 1){
+			j++;
+		}
+		while(linha >= 0 || coluna <= linha){
+			printf("Linha: %d, Coluna: %d \n", linha, coluna);
+			if(matriz[linha][coluna] == jogadorVez){
+				count++;
+			}else{
+				count = 0;
+			}	
 			
-			//comparo
+			if(count >= numPecas){
+				break;
+			}
+			//confere se peca eh a certa
 			linha--;
 			coluna++;
 		}
+		if(count >= numPecas){
+			break;
+		}
+		i++;
 	}
 	
+	//printf("Contou: %d\n", contou);
 	
 	if(count >= numPecas){
 		vencedor = 1;
@@ -142,7 +162,8 @@ int main(){
 		matriz[linha][coluna] = jogadorVez + 1;
 		
 		
-		vencedor = verificaVencedorHorizontal(tamanhoMatriz, matriz, jogadorVez + 1);
+		//vencedor = verificaVencedorHorizontal(tamanhoMatriz, matriz, jogadorVez + 1);
+		vencedor = verificaVencDiagEsqInfParaDirSup(tamanhoMatriz, matriz, jogadorVez + 1);
 		
 		// define proximo jogador
 		jogadorVez = alteraJogador(jogadorVez);
@@ -158,7 +179,6 @@ int main(){
 	escreveMatriz(tamanhoMatriz, matriz);
 	
 	printf("\nJogador %d venceu! \n", jogadorVencedor + 1);
-	printf("Parou");
 	
 	return 0;
 }
