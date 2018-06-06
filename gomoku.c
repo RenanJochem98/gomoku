@@ -2,6 +2,8 @@
 #include <time.h>
 #include <math.h>
 # include <stdio.h>
+
+int vencedorGeral = 0;
 // funcao para imprimir a matriz na tela. Apenas para despoluir a funcao principal
 void escreveMatriz(int tamMatriz, int matriz[tamMatriz][tamMatriz]){
 	int i;
@@ -43,12 +45,17 @@ int verificaVencedorHorizontal(int tamMatriz, int matriz[tamMatriz][tamMatriz], 
 		}
 		count = 0;
 	}
-
+	printf("Horizontal, count: %d \n", count);
+	printf("Horizontal, tamMatriz: %d \n", tamMatriz);
+	printf("Horizontal, NumPecas: %d \n", numPecas);
 	if(count >= numPecas){
 		vencedor = 1;
+		vencedorGeral = 1;
+		printf("Vencedor geral deveria ser alterado aqui: Horizontal\n");
 	}
 	return vencedor;
 }
+
 int verificaVencedorVertical(int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
     int i;
     int j;
@@ -76,6 +83,8 @@ int verificaVencedorVertical(int tamMatriz, int matriz[tamMatriz][tamMatriz], in
 
 	if(count >= numPecas){
 		vencedor = 1;
+		vencedorGeral = 1;
+		printf("Vencedor geral deveria ser alterado aqui: Vertical\n");
 	}
 	return vencedor;
 }
@@ -130,23 +139,26 @@ int verificaVencedor(int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogado
 
 	struct params p;
 	p.tamMatriz = tamMatriz;
+	p.matriz[tamMatriz][tamMatriz] = matriz;
+	p.jogadorVez = jogadorVez;
 
 	int vencedores[2] = {0, 0};
 
 	pthread_create(&horizontal, NULL, verificaVencedorHorizontal, &p);
 	pthread_create(&vertical, NULL, verificaVencedorVertical, &p);
 
-	pthread_join(&horizontal, vencedores[0]);
-	pthread_join(&vertical, vencedores[1]);
+	pthread_join(&horizontal, NULL);
+	pthread_join(&vertical, NULL);
 
+	printf("Vencedor Geral %d\n", vencedorGeral);
 	int i;
 	int maior = 0;
-	for(i = 0; i < 2; i++){
-		printf("Vencedor, retorno: %d \n", vencedores[i]);
-		if(vencedores[i] > maior){
-			maior = vencedores[i];
-		}
-	}
+	// for(i = 0; i < 2; i++){
+	// 	// printf("Vencedor, retorno: %d \n", vencedores[i]);
+	// 	if(vencedores[i] > maior){
+	// 		maior = vencedores[i];
+	// 	}
+	// }
 
 	return maior;
 }
@@ -184,7 +196,7 @@ int main(){
 		}
 
 	// enquanto nao houver vencedor... ao menos ate implementarmos isso
-	while(vencedor < 1){
+	while(vencedor < 1 && vencedorGeral < 1){
 
 		// imprime a matriz na tela
 		escreveMatriz(tamanhoMatriz, matriz);
@@ -225,10 +237,10 @@ int main(){
 		contaPecaTotal = contaPecaTotal - 1;
 
 	}
-	if(verificaEmpate == 1){
-	    printf("\nTemos um Empate! \n");
-	    printf("Parou");
-	} else{
+	// if(verificaEmpate == 1){
+	//     printf("\nTemos um Empate! \n");
+	//     printf("Parou");
+	// } else{
     	// como o jogador da vez foi alterado dentro do while, alteramos de novo para pegar o vencedor
     	int jogadorVencedor = alteraJogador(jogadorVez);
 
@@ -238,6 +250,6 @@ int main(){
 
     	printf("\nJogador %d venceu! \n", jogadorVencedor + 1);
     	printf("Parou");
-    }
+    // }
 	return 0;
 }
