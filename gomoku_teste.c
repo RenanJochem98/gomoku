@@ -8,7 +8,9 @@ int tamanhoMatriz;
 int jogadorVez;
 pthread_mutex_t mutex;
 // funcao para imprimir a matriz na tela. Apenas para despoluir a funcao principal
-void escreveMatriz(int matriz[tamanhoMatriz][tamanhoMatriz]){
+// void escreveMatriz(int matriz[tamanhoMatriz][tamanhoMatriz]){
+void escreveMatriz(void *matrizPont){
+	int **matriz = (int **)matrizPont;
 	int i;
 	int j;
 	for(i = 0; i < tamanhoMatriz; i++){
@@ -93,7 +95,7 @@ void *verificaVencedorVertical(void *matrizPont){
 		}
 		count = 0;
 	}
-	
+
 	if(count >= numPecas){
 		vencedor = 1;
 		vencedorGeral = 1;
