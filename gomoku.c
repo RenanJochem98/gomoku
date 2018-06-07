@@ -11,8 +11,7 @@ int jogadorVez;
 // funcao para imprimir a matriz na tela. Apenas para despoluir a funcao principal
 void escreveMatriz(void *matrizPont){
 	int **matriz = (int **)matrizPont;
-	int i;
-	int j;
+	int i, j;
 	for(i = 0; i < tamanhoMatriz; i++){
 		for(j = 0; j < tamanhoMatriz; j++){
 			printf("%d ", matriz[i][j]);
@@ -28,10 +27,8 @@ int alteraJogador(int jogador){
 
 void *verificaVencedorHorizontal(void *matrizPont){
 	int **matriz = (int **)matrizPont;
+	int i, j, count = 0;
 	int jogVez = jogadorVez + 1;
-	int i;
-	int j;
-	int count = 0;
 	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
 	for(i = 0; i < tamanhoMatriz; i++){
@@ -42,13 +39,9 @@ void *verificaVencedorHorizontal(void *matrizPont){
 				count = 0;
 			}
 
-			if(count >= numPecas){
-				break;
-			}
+			if(count >= numPecas){		break;		}
 		}
-		if(count >= numPecas){
-			break;
-		}
+		if(count >= numPecas){	  break;	}
 		count = 0;
 	}
 	if(count >= numPecas){
@@ -59,10 +52,8 @@ void *verificaVencedorHorizontal(void *matrizPont){
 
 void *verificaVencedorVertical(void *matrizPont){
 	int **matriz = (int **)matrizPont;
+	int i, j, count = 0;
 	int jogVez = jogadorVez + 1;
-    int i;
-    int j;
-    int count = 0;
     int numPecas = tamanhoMatriz / 2;
 
 	for(i = 0; i < tamanhoMatriz; i++){
@@ -73,13 +64,9 @@ void *verificaVencedorVertical(void *matrizPont){
 				count = 0;
 			}
 
-			if(count >= numPecas){
-				break;
-			}
+			if(count >= numPecas){		break;		}
 	    }
-		if(count >= numPecas){
-			break;
-		}
+		if(count >= numPecas){		break;  	}
 		count = 0;
 	}
 
@@ -92,18 +79,13 @@ void *verificaVencedorVertical(void *matrizPont){
 // testa todas as diagonais com espacos sufientes para alguem vencer, no sentido da diagonal secundaria
 void *verificaVencDiagSecundaria(void *matrizPont){
 	int **matriz = (int **)matrizPont;
+	int i, j, count = 0, count2 = 0, linha = 0, coluna = 0;
 	int jogVez = jogadorVez + 1;
-	int i;
-	int j;
-	int count = 0;
-	int count2 = 0;
 	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
 	int primeiraLinha  = numPecas - 1;
 	int ultimaColuna = tamanhoMatriz - (numPecas - 1);
 	int maiorLinColMatriz = tamanhoMatriz - 1;
-	int linha = 0;
-	int coluna = 0;
 	i = primeiraLinha;
 	// for(i = primeiraLinha; i < tamanhoMatriz; i++){
 	while(i < tamanhoMatriz || (linha == maiorLinColMatriz && coluna == maiorLinColMatriz)){
@@ -120,22 +102,15 @@ void *verificaVencDiagSecundaria(void *matrizPont){
 				count2 = 0;
 			}
 			// comeca a contar as diagonais apos a diagonal secundaria
-			if(count >= numPecas || count2 >= numPecas){
-				break;
-			}
+			if(count >= numPecas || count2 >= numPecas){	break;		}
+
 			coluna++;
-			if(linha == 0){
-				coluna = 0;
-			}
+			if(linha == 0){		coluna = 0;		}
 			linha--;
 		}
-		if(count >= numPecas || count2 >= numPecas){
-			break;
-		}
+		if(count >= numPecas || count2 >= numPecas){	break;  	}
 
-		if(linha < maiorLinColMatriz){
-			i++;
-		}
+		if(linha < maiorLinColMatriz){		i++;	}
 	}
 	if(count >= numPecas || count2 >= numPecas){
 		vencedorGeral = 1;
@@ -146,18 +121,14 @@ void *verificaVencDiagSecundaria(void *matrizPont){
 // testa todas as diagonais com espacos sufientes para alguem vencer, no sentido da diagonal principal
 void *verificaVencedorDiagPrincipal(void *matrizPont){
 	int **matriz = (int **)matrizPont;
+	int i, j, count = 0, count2 = 0, linha = 0, coluna = tamanhoMatriz - 1;
+
 	int jogVez = jogadorVez + 1;
-	int i;
-	int j;
-	int count = 0;
-	int count2 = 0;
 	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
 	int primeiraLinha  = numPecas - 1;
 	int ultimaColuna = tamanhoMatriz - (numPecas - 1);
 	int maiorLinColMatriz = tamanhoMatriz - 1;
-	int linha = 0;
-	int coluna = tamanhoMatriz - 1;
 	i = primeiraLinha;
 	// for(i = primeiraLinha; i < tamanhoMatriz; i++){
 	while(i < tamanhoMatriz || (linha == maiorLinColMatriz && coluna == 0)){
@@ -176,22 +147,15 @@ void *verificaVencedorDiagPrincipal(void *matrizPont){
 				count2 = 0;
 			}
 
-			if(count >= numPecas || count2 >= numPecas){
-				break;
-			}
+			if(count >= numPecas || count2 >= numPecas){	break;		}
+
 			coluna--;
-			if(linha == 0){
-				coluna = maiorLinColMatriz;
-			}
+			if(linha == 0){		coluna = maiorLinColMatriz;		}
 			linha--;
 		}
-		if(count >= numPecas || count2 >= numPecas){
-			break;
-		}
+		if(count >= numPecas || count2 >= numPecas){	break;	}
 		// printf("\nPulou\n");
-		if(linha < maiorLinColMatriz){
-			i++;
-		}
+		if(linha < maiorLinColMatriz){	 i++;	}
 	}
 	if(count >= numPecas || count2 >= numPecas){
 		vencedorGeral = 1;
@@ -200,14 +164,7 @@ void *verificaVencedorDiagPrincipal(void *matrizPont){
 }
 
 int main(){
-	int linha;
-	int coluna;
-
-	int i;
-	int j;
-
-	int jogador1 = 0;
-	int jogador2 = 1;
+	int i, j, linha, coluna, jogador1 = 0, jogador2 = 1;
 
 	printf("Digite o numero de pedras: \n");
 	scanf("%d", &tamanhoMatriz);
