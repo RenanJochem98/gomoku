@@ -95,15 +95,17 @@ void *verificaVencDiagEsqInfParaDirSup(void *matrizPont){
 	int i;
 	int j;
 	int count = 0;
+	int count2 = 0;
 	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
 	int primeiraLinha  = numPecas - 1;
 	int ultimaColuna = tamanhoMatriz - (numPecas - 1);
+	int maiorLinColMatriz = tamanhoMatriz - 1;
 	int linha = 0;
 	int coluna = 0;
 	i = primeiraLinha;
 	// for(i = primeiraLinha; i < tamanhoMatriz; i++){
-	while(i < tamanhoMatriz || (linha == tamanhoMatriz - 1 && coluna == tamanhoMatriz - 1)){
+	while(i < tamanhoMatriz || (linha == maiorLinColMatriz && coluna == maiorLinColMatriz)){
 		linha = i;
 		while(linha >= 0){
 			if(matriz[linha][coluna] == jogVez){
@@ -111,8 +113,13 @@ void *verificaVencDiagEsqInfParaDirSup(void *matrizPont){
 			}else{
 				count = 0;
 			}
-
-			if(count >= numPecas){
+			if(matriz[maiorLinColMatriz - coluna][maiorLinColMatriz - linha] == jogVez){
+				count2++;
+			}else{
+				count2 = 0;
+			}
+			// comeca a contar as diagonais apos a diagonal secundaria
+			if(count >= numPecas || count2 >= numPecas){
 				break;
 			}
 			coluna++;
@@ -121,15 +128,15 @@ void *verificaVencDiagEsqInfParaDirSup(void *matrizPont){
 			}
 			linha--;
 		}
-		if(count >= numPecas){
+		if(count >= numPecas || count2 >= numPecas){
 			break;
 		}
-		// printf("Pulou\n");
-		if(linha < tamanhoMatriz - 1){
+
+		if(linha < maiorLinColMatriz){
 			i++;
 		}
 	}
-	if(count >= numPecas){
+	if(count >= numPecas || count2 >= numPecas){
 		vencedorGeral = 1;
 	}
 	return NULL;
