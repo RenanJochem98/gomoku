@@ -20,6 +20,16 @@ void escreveMatriz(void *matrizPont){
 	}
 }
 
+int testaPosicaoJogadorVez(int posicao, int jogVez, int count){
+	if(posicao == jogVez){
+		count++;
+	}else{
+		count = 0;
+	}
+
+	return count;
+}
+
 // como sao apenas dois jogadores, 0 e 1, para alterar entre eles basta diminuir um e pegar o valor positivo
 int alteraJogador(int jogador){
 	return abs(jogador - 1);
@@ -33,11 +43,7 @@ void *verificaVencedorHorizontal(void *matrizPont){
 
 	for(i = 0; i < tamanhoMatriz; i++){
 		for(j = 0; j < tamanhoMatriz; j++){
-			if(matriz[i][j] == jogVez){
-				count++;
-			}else{
-				count = 0;
-			}
+			count = testaPosicaoJogadorVez(matriz[i][j], jogVez, count);
 
 			if(count >= numPecas){		break;		}
 		}
@@ -58,11 +64,7 @@ void *verificaVencedorVertical(void *matrizPont){
 
 	for(i = 0; i < tamanhoMatriz; i++){
 	    for(j = 0; j < tamanhoMatriz; j++){
-			if(matriz[j][i] == jogVez){
-				count++;
-			}else{
-				count = 0;
-			}
+			count = testaPosicaoJogadorVez(matriz[j][i], jogVez, count);
 
 			if(count >= numPecas){		break;		}
 	    }
@@ -84,23 +86,14 @@ void *verificaVencDiagSecundaria(void *matrizPont){
 	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
 	int primeiraLinha  = numPecas - 1;
-	int ultimaColuna = tamanhoMatriz - (numPecas - 1);
 	int maiorLinColMatriz = tamanhoMatriz - 1;
 	i = primeiraLinha;
 	// for(i = primeiraLinha; i < tamanhoMatriz; i++){
 	while(i < tamanhoMatriz || (linha == maiorLinColMatriz && coluna == maiorLinColMatriz)){
 		linha = i;
 		while(linha >= 0){
-			if(matriz[linha][coluna] == jogVez){
-				count++;
-			}else{
-				count = 0;
-			}
-			if(matriz[maiorLinColMatriz - coluna][maiorLinColMatriz - linha] == jogVez){
-				count2++;
-			}else{
-				count2 = 0;
-			}
+			count = testaPosicaoJogadorVez(matriz[linha][coluna], jogVez, count);
+			count2 = testaPosicaoJogadorVez(matriz[maiorLinColMatriz - coluna][maiorLinColMatriz - linha], jogVez, count2);
 			// comeca a contar as diagonais apos a diagonal secundaria
 			if(count >= numPecas || count2 >= numPecas){	break;		}
 
@@ -127,25 +120,14 @@ void *verificaVencedorDiagPrincipal(void *matrizPont){
 	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
 	int primeiraLinha  = numPecas - 1;
-	int ultimaColuna = tamanhoMatriz - (numPecas - 1);
 	int maiorLinColMatriz = tamanhoMatriz - 1;
 	i = primeiraLinha;
 	// for(i = primeiraLinha; i < tamanhoMatriz; i++){
 	while(i < tamanhoMatriz || (linha == maiorLinColMatriz && coluna == 0)){
 		linha = i;
 		while(linha >= 0){
-			if(matriz[linha][coluna] == jogVez){
-				count++;
-			}else{
-				count = 0;
-			}
-
-			// comeca a contar as diagonais antes da diagonal principal
-			if(matriz[coluna][linha] == jogVez){
-				count2++;
-			}else{
-				count2 = 0;
-			}
+			count = testaPosicaoJogadorVez(matriz[linha][coluna], jogVez, count);
+			count2 = testaPosicaoJogadorVez(matriz[coluna][linha], jogVez, count2);
 
 			if(count >= numPecas || count2 >= numPecas){	break;		}
 
@@ -154,7 +136,7 @@ void *verificaVencedorDiagPrincipal(void *matrizPont){
 			linha--;
 		}
 		if(count >= numPecas || count2 >= numPecas){	break;	}
-		// printf("\nPulou\n");
+		
 		if(linha < maiorLinColMatriz){	 i++;	}
 	}
 	if(count >= numPecas || count2 >= numPecas){
@@ -182,7 +164,6 @@ int main(){
     for (i = 0; i < tamanhoMatriz; i++){
         matriz[i] = (int *)malloc(tamanhoMatriz * sizeof(int));
 	}
-
 
 	// inicializa a matriz com zeros
 	for(i = 0; i < tamanhoMatriz; i++){
@@ -226,18 +207,18 @@ int main(){
 		// nao tera influencia nas outras threads
 		pthread_t horizontal;
 		pthread_t vertical;
-		pthread_t diagonal;
-		pthread_t diagonalOutra;
+		pthread_t diagonalSecundaria;
+		pthread_t diagonalPrincipal;
 
 		pthread_create(&horizontal, NULL, verificaVencedorHorizontal, matriz);
 		pthread_create(&vertical, NULL, verificaVencedorVertical, matriz);
-		pthread_create(&diagonal, NULL, verificaVencDiagSecundaria, matriz);
-		pthread_create(&diagonalOutra, NULL, verificaVencedorDiagPrincipal, matriz);
+		pthread_create(&diagonalSecundaria, NULL, verificaVencDiagSecundaria, matriz);
+		pthread_create(&diagonalPrincipal, NULL, verificaVencedorDiagPrincipal, matriz);
 
 		pthread_join(horizontal, NULL);
 		pthread_join(vertical, NULL);
-		pthread_join(diagonal, NULL);
-		pthread_join(diagonalOutra, NULL);
+		pthread_join(diagonalSecundaria, NULL);
+		pthread_join(diagonalPrincipal, NULL);
 
 		// define proximo jogador
 		jogadorVez = alteraJogador(jogadorVez);
