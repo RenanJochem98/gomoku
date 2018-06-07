@@ -1,19 +1,24 @@
-#include <pthread.h>
 #include <time.h>
 #include <math.h>
-# include <stdio.h>
+# include <stdlib.h>
+# include <stdio.h> //para alocacao dinamica (funcao malloc dava warning)
+#include <pthread.h>
 
 int vencedorGeral = 0;
+int tamanhoMatriz;
+int jogadorVez;
+
 // funcao para imprimir a matriz na tela. Apenas para despoluir a funcao principal
-void escreveMatriz(int tamMatriz, int matriz[tamMatriz][tamMatriz]){
+void escreveMatriz(void *matrizPont){
+	int **matriz = (int **)matrizPont;
 	int i;
 	int j;
-	for(i = 0; i < tamMatriz; i++){
-			for(j = 0; j < tamMatriz; j++){
-				printf("%d ", matriz[i][j]);
-			}
-			printf("\n");
+	for(i = 0; i < tamanhoMatriz; i++){
+		for(j = 0; j < tamanhoMatriz; j++){
+			printf("%d ", matriz[i][j]);
 		}
+		printf("\n");
+	}
 }
 
 // como sao apenas dois jogadores, 0 e 1, para alterar entre eles basta diminuir um e pegar o valor positivo
@@ -21,16 +26,17 @@ int alteraJogador(int jogador){
 	return abs(jogador - 1);
 }
 
-int verificaVencedorHorizontal(int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
+void *verificaVencedorHorizontal(void *matrizPont){
+	int **matriz = (int **)matrizPont;
+	int jogVez = jogadorVez + 1;
 	int i;
 	int j;
 	int count = 0;
-	int numPecas = tamMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
-	int vencedor = 0;
+	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
-	for(i = 0; i < tamMatriz; i++){
-		for(j = 0; j < tamMatriz; j++){
-			if(matriz[i][j] == jogadorVez){
+	for(i = 0; i < tamanhoMatriz; i++){
+		for(j = 0; j < tamanhoMatriz; j++){
+			if(matriz[i][j] == jogVez){
 				count++;
 			}else{
 				count = 0;
@@ -45,27 +51,23 @@ int verificaVencedorHorizontal(int tamMatriz, int matriz[tamMatriz][tamMatriz], 
 		}
 		count = 0;
 	}
-	printf("Horizontal, count: %d \n", count);
-	printf("Horizontal, tamMatriz: %d \n", tamMatriz);
-	printf("Horizontal, NumPecas: %d \n", numPecas);
 	if(count >= numPecas){
-		vencedor = 1;
 		vencedorGeral = 1;
-		printf("Vencedor geral deveria ser alterado aqui: Horizontal\n");
 	}
-	return vencedor;
+	return NULL;
 }
 
-int verificaVencedorVertical(int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
+void *verificaVencedorVertical(void *matrizPont){
+	int **matriz = (int **)matrizPont;
+	int jogVez = jogadorVez + 1;
     int i;
     int j;
     int count = 0;
-    int numPecas = tamMatriz / 2;
-    int vencedor = 0;
+    int numPecas = tamanhoMatriz / 2;
 
-	for(i = 0; i < tamMatriz; i++){
-	    for(j = 0; j < tamMatriz; j++){
-			if(matriz[j][i] == jogadorVez){
+	for(i = 0; i < tamanhoMatriz; i++){
+	    for(j = 0; j < tamanhoMatriz; j++){
+			if(matriz[j][i] == jogVez){
 				count++;
 			}else{
 				count = 0;
@@ -82,11 +84,9 @@ int verificaVencedorVertical(int tamMatriz, int matriz[tamMatriz][tamMatriz], in
 	}
 
 	if(count >= numPecas){
-		vencedor = 1;
 		vencedorGeral = 1;
-		printf("Vencedor geral deveria ser alterado aqui: Vertical\n");
 	}
-	return vencedor;
+	return NULL;
 }
 int verificaEmpate(int contTotalPec, int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
     int verificaEmpate;
@@ -105,8 +105,6 @@ int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMat
 
 	int primeiraLinha  = numPecas - 1;
 	int ultimaColuna = tamMatriz - (numPecas - 1);
-
-
 	int coluna = 0;
 
 	for(i = primeiraLinha; i < tamMatriz; i++){
@@ -120,47 +118,10 @@ int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMat
 		}
 	}
 
-
 	if(count >= numPecas){
 		vencedor = 1;
 	}
 	return vencedor;
-}
-
-int verificaVencedor(int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
-	pthread_t horizontal;
-	pthread_t vertical;
-
-	struct params {
-		int tamMatriz;
-		int matriz[tamMatriz][tamMatriz];
-		int jogadorVez;
-	};
-
-	struct params p;
-	p.tamMatriz = tamMatriz;
-	p.matriz[tamMatriz][tamMatriz] = matriz;
-	p.jogadorVez = jogadorVez;
-
-	int vencedores[2] = {0, 0};
-
-	pthread_create(&horizontal, NULL, verificaVencedorHorizontal, &p);
-	pthread_create(&vertical, NULL, verificaVencedorVertical, &p);
-
-	pthread_join(&horizontal, NULL);
-	pthread_join(&vertical, NULL);
-
-	printf("Vencedor Geral %d\n", vencedorGeral);
-	int i;
-	int maior = 0;
-	// for(i = 0; i < 2; i++){
-	// 	// printf("Vencedor, retorno: %d \n", vencedores[i]);
-	// 	if(vencedores[i] > maior){
-	// 		maior = vencedores[i];
-	// 	}
-	// }
-
-	return maior;
 }
 
 int main(){
@@ -168,7 +129,7 @@ int main(){
 	int vencedor = 0;
 	int linha;
 	int coluna;
-	int tamanhoMatriz;
+	// int tamanhoMatriz;
 
 	int jogador1 = 0;
 	int jogador2 = 1;
@@ -179,27 +140,32 @@ int main(){
 	printf("Digite o numero de pedras: \n");
 	scanf("%d", &tamanhoMatriz);
 
-	int jogadorVez = (rand() % 2);
+	// primeiro jogador escolhido randomicamente
+	jogadorVez = (rand() % 2);
 
 	// a matriz tem que ter o dobro de numero de pedras
 	tamanhoMatriz *= 2;
 
-	int matriz[tamanhoMatriz][tamanhoMatriz];
+	// cria uma matriz com alocacao dinamica. Foi o unico modo que consegui criar uma matriz e passar corretamente
+	// para as funcoes nas threads
+	int **matriz = (int **)malloc(tamanhoMatriz * sizeof(int *));
+    for (i = 0; i < tamanhoMatriz; i++){
+        matriz[i] = (int *)malloc(tamanhoMatriz * sizeof(int));
+	}
 
 	int contaPecaTotal = tamanhoMatriz * tamanhoMatriz;
 
-	// inicializa a matriz
+	// inicializa a matriz com zeros
 	for(i = 0; i < tamanhoMatriz; i++){
-			for(j = 0; j < tamanhoMatriz; j++){
-				matriz[i][j] = 0;
-			}
+		for(j = 0; j < tamanhoMatriz; j++){
+			matriz[i][j] = 0;
 		}
+	}
 
 	// enquanto nao houver vencedor... ao menos ate implementarmos isso
-	while(vencedor < 1 && vencedorGeral < 1){
-
+	while(vencedorGeral < 1){
 		// imprime a matriz na tela
-		escreveMatriz(tamanhoMatriz, matriz);
+		escreveMatriz(matriz);
 
 		// paga entrada de linha e coluna do teclado
 		printf("Vez do jogador %d \n", jogadorVez + 1);
@@ -226,17 +192,24 @@ int main(){
 		// imprime o valor referente ao jogador
 		matriz[linha][coluna] = jogadorVez + 1;
 
+		// nao eh necessario usar a varivel mutex, pois as threads usam a matriz apenas para consulta
+		// A unica variavel global que eh alterada, ira apenas alterada de 0 para 1, nao importa quem a altera,
+		// nao tera influencia nas outras threads
+		pthread_t horizontal;
+		pthread_t vertical;
 
-		// vencedor = verificaVencedorHorizontal(tamanhoMatriz, matriz, jogadorVez + 1);
-		// vencedor = verificaEmpate(contaPecaTotal, tamanhoMatriz, matriz, jogadorVez + 1);
-		// vencedor = verificaVencedorVertical(tamanhoMatriz, matriz, jogadorVez + 1);
+		pthread_create(&horizontal, NULL, verificaVencedorHorizontal, matriz);
+		pthread_create(&vertical, NULL, verificaVencedorVertical, matriz);
+
+		pthread_join(horizontal, NULL);
+		pthread_join(vertical, NULL);
+
 		// define proximo jogador
-		vencedor = verificaVencedor(tamanhoMatriz, matriz, jogadorVez + 1);
 		jogadorVez = alteraJogador(jogadorVez);
 
 		contaPecaTotal = contaPecaTotal - 1;
 
-	}
+	}//fim whiele
 	// if(verificaEmpate == 1){
 	//     printf("\nTemos um Empate! \n");
 	//     printf("Parou");
@@ -246,10 +219,9 @@ int main(){
 
     	printf("\nTemos um vencedor! \n");
 
-    	escreveMatriz(tamanhoMatriz, matriz);
+    	escreveMatriz(matriz);
 
     	printf("\nJogador %d venceu! \n", jogadorVencedor + 1);
-    	printf("Parou");
     // }
 	return 0;
 }
