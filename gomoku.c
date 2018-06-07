@@ -89,7 +89,8 @@ void *verificaVencedorVertical(void *matrizPont){
 	return NULL;
 }
 
-void *verificaVencDiagEsqInfParaDirSup(void *matrizPont){
+// testa todas as diagonais com espacos sufientes para alguem vencer, no sentido da diagonal secundaria
+void *verificaVencDiagSecundaria(void *matrizPont){
 	int **matriz = (int **)matrizPont;
 	int jogVez = jogadorVez + 1;
 	int i;
@@ -142,7 +143,8 @@ void *verificaVencDiagEsqInfParaDirSup(void *matrizPont){
 	return NULL;
 }
 
-void *verificaVencDiagEsqSupParaDirInf(void *matrizPont){
+// testa todas as diagonais com espacos sufientes para alguem vencer, no sentido da diagonal principal
+void *verificaVencedorDiagPrincipal(void *matrizPont){
 	int **matriz = (int **)matrizPont;
 	int jogVez = jogadorVez + 1;
 	int i;
@@ -167,7 +169,7 @@ void *verificaVencDiagEsqSupParaDirInf(void *matrizPont){
 				count = 0;
 			}
 
-			// comeca a contar as diagomais antes da diagonal principal
+			// comeca a contar as diagonais antes da diagonal principal
 			if(matriz[coluna][linha] == jogVez){
 				count2++;
 			}else{
@@ -272,8 +274,8 @@ int main(){
 
 		pthread_create(&horizontal, NULL, verificaVencedorHorizontal, matriz);
 		pthread_create(&vertical, NULL, verificaVencedorVertical, matriz);
-		pthread_create(&diagonal, NULL, verificaVencDiagEsqInfParaDirSup, matriz);
-		pthread_create(&diagonalOutra, NULL, verificaVencDiagEsqSupParaDirInf, matriz);
+		pthread_create(&diagonal, NULL, verificaVencDiagSecundaria, matriz);
+		pthread_create(&diagonalOutra, NULL, verificaVencedorDiagPrincipal, matriz);
 
 		pthread_join(horizontal, NULL);
 		pthread_join(vertical, NULL);
