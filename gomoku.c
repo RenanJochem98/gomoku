@@ -135,6 +135,52 @@ void *verificaVencDiagEsqInfParaDirSup(void *matrizPont){
 	return NULL;
 }
 
+void *verificaVencDiagEsqSupParaDirInf(void *matrizPont){
+	int **matriz = (int **)matrizPont;
+	int jogVez = jogadorVez + 1;
+	int i;
+	int j;
+	int count = 0;
+	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
+
+	int primeiraLinha  = numPecas - 1;
+	int ultimaColuna = tamanhoMatriz - (numPecas - 1);
+	int linha = 0;
+	int coluna = tamanhoMatriz - 1;
+	i = primeiraLinha;
+	// for(i = primeiraLinha; i < tamanhoMatriz; i++){
+	while(i < tamanhoMatriz || (linha == tamanhoMatriz - 1 && coluna == 0)){
+		linha = i;
+		while(linha >= 0){
+			if(matriz[linha][coluna] == jogVez){
+				count++;
+			}else{
+				count = 0;
+			}
+
+			if(count >= numPecas){
+				break;
+			}
+			coluna--;
+			if(linha == 0){
+				coluna = tamanhoMatriz - 1;
+			}
+			linha--;
+		}
+		if(count >= numPecas){
+			break;
+		}
+		// printf("Pulou\n");
+		if(linha < tamanhoMatriz - 1){
+			i++;
+		}
+	}
+	if(count >= numPecas){
+		vencedorGeral = 1;
+	}
+	return NULL;
+}
+
 int main(){
 	int linha;
 	int coluna;
@@ -206,14 +252,17 @@ int main(){
 		pthread_t horizontal;
 		pthread_t vertical;
 		pthread_t diagonal;
+		pthread_t diagonalOutra;
 
 		pthread_create(&horizontal, NULL, verificaVencedorHorizontal, matriz);
 		pthread_create(&vertical, NULL, verificaVencedorVertical, matriz);
 		pthread_create(&diagonal, NULL, verificaVencDiagEsqInfParaDirSup, matriz);
+		pthread_create(&diagonalOutra, NULL, verificaVencDiagEsqSupParaDirInf, matriz);
 
 		pthread_join(horizontal, NULL);
 		pthread_join(vertical, NULL);
 		pthread_join(diagonal, NULL);
+		pthread_join(diagonalOutra, NULL);
 
 		// define proximo jogador
 		jogadorVez = alteraJogador(jogadorVez);
