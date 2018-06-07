@@ -88,13 +88,6 @@ void *verificaVencedorVertical(void *matrizPont){
 	}
 	return NULL;
 }
-int verificaEmpate(int contTotalPec, int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
-    int verificaEmpate;
-    if(contTotalPec == 0){
-        return verificaEmpate = 1;
-    }
-    return verificaEmpate = 0;
-}
 
 int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
 	int i;
@@ -125,17 +118,14 @@ int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMat
 }
 
 int main(){
-	int verificaEmpate = 0;
-	int vencedor = 0;
 	int linha;
 	int coluna;
-	// int tamanhoMatriz;
-
-	int jogador1 = 0;
-	int jogador2 = 1;
 
 	int i;
 	int j;
+
+	int jogador1 = 0;
+	int jogador2 = 1;
 
 	printf("Digite o numero de pedras: \n");
 	scanf("%d", &tamanhoMatriz);
@@ -145,6 +135,7 @@ int main(){
 
 	// a matriz tem que ter o dobro de numero de pedras
 	tamanhoMatriz *= 2;
+	int totalPosicoesDisp = tamanhoMatriz * tamanhoMatriz; // para verificar empate
 
 	// cria uma matriz com alocacao dinamica. Foi o unico modo que consegui criar uma matriz e passar corretamente
 	// para as funcoes nas threads
@@ -153,7 +144,6 @@ int main(){
         matriz[i] = (int *)malloc(tamanhoMatriz * sizeof(int));
 	}
 
-	int contaPecaTotal = tamanhoMatriz * tamanhoMatriz;
 
 	// inicializa a matriz com zeros
 	for(i = 0; i < tamanhoMatriz; i++){
@@ -163,7 +153,7 @@ int main(){
 	}
 
 	// enquanto nao houver vencedor... ao menos ate implementarmos isso
-	while(vencedorGeral < 1){
+	while(vencedorGeral < 1 && totalPosicoesDisp > 0){
 		// imprime a matriz na tela
 		escreveMatriz(matriz);
 
@@ -207,13 +197,13 @@ int main(){
 		// define proximo jogador
 		jogadorVez = alteraJogador(jogadorVez);
 
-		contaPecaTotal = contaPecaTotal - 1;
+		totalPosicoesDisp -= 1; // tira uma posicao, quando for zero, eh empate
 
 	}//fim whiele
-	// if(verificaEmpate == 1){
-	//     printf("\nTemos um Empate! \n");
-	//     printf("Parou");
-	// } else{
+	printf("\nO jogo acabou! \n");
+	if(totalPosicoesDisp == 0){
+	    printf("\nTemos um Empate! \n");
+	} else{
     	// como o jogador da vez foi alterado dentro do while, alteramos de novo para pegar o vencedor
     	int jogadorVencedor = alteraJogador(jogadorVez);
 
@@ -222,6 +212,6 @@ int main(){
     	escreveMatriz(matriz);
 
     	printf("\nJogador %d venceu! \n", jogadorVencedor + 1);
-    // }
+    }
 	return 0;
 }
