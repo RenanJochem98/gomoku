@@ -24,8 +24,10 @@ int alteraJogador(int jogador){
 	return abs(jogador - 1);
 }
 
-int verificaVencedorHorizontal(int matriz[tamanhoMatriz][tamanhoMatriz]){
+// int verificaVencedorHorizontal(int matriz[tamanhoMatriz][tamanhoMatriz]){
+void *verificaVencedorHorizontal(void *matrizPont){
 	pthread_mutex_lock(&mutex);
+	int **matriz = (int **)matrizPont;
 	int jogVez = jogadorVez + 1;
 	int i;
 	int j;
@@ -50,9 +52,9 @@ int verificaVencedorHorizontal(int matriz[tamanhoMatriz][tamanhoMatriz]){
 		}
 		count = 0;
 	}
-	printf("Vertical, jogador vez: %d \n", jogVez);
-	printf("Horizontal, count: %d \n", count);
-	printf("Horizontal, NumPecas: %d \n", numPecas);
+	// printf("Vertical, jogador vez: %d \n", jogVez);
+	// printf("Horizontal, count: %d \n", count);
+	// printf("Horizontal, NumPecas: %d \n", numPecas);
 	if(count >= numPecas){
 		vencedor = 1;
 		vencedorGeral = 1;
@@ -60,11 +62,13 @@ int verificaVencedorHorizontal(int matriz[tamanhoMatriz][tamanhoMatriz]){
 	}
 	pthread_mutex_unlock(&mutex);
 	pthread_exit(NULL);
-	return vencedor;
+	return NULL;
 }
 
-int verificaVencedorVertical(int matriz[tamanhoMatriz][tamanhoMatriz]){
+// int verificaVencedorVertical(int matriz[tamanhoMatriz][tamanhoMatriz]){
+void *verificaVencedorVertical(void *matrizPont){
 	pthread_mutex_lock(&mutex);
+	int **matriz = (int **)matrizPont;
 	int jogVez = jogadorVez + 1;
     int i;
     int j;
@@ -89,9 +93,7 @@ int verificaVencedorVertical(int matriz[tamanhoMatriz][tamanhoMatriz]){
 		}
 		count = 0;
 	}
-	printf("Vertical, jogador vez: %d \n", jogVez);
-	printf("Vertical, count: %d \n", count);
-	printf("Vertical, NumPecas: %d \n", numPecas);
+	
 	if(count >= numPecas){
 		vencedor = 1;
 		vencedorGeral = 1;
@@ -118,8 +120,6 @@ int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMat
 
 	int primeiraLinha  = numPecas - 1;
 	int ultimaColuna = tamMatriz - (numPecas - 1);
-
-
 	int coluna = 0;
 
 	for(i = primeiraLinha; i < tamMatriz; i++){
@@ -133,47 +133,10 @@ int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMat
 		}
 	}
 
-
 	if(count >= numPecas){
 		vencedor = 1;
 	}
 	return vencedor;
-}
-
-int verificaVencedor(int matriz[tamanhoMatriz][tamanhoMatriz]){
-	pthread_t horizontal;
-	pthread_t vertical;
-
-	struct params {
-		int matriz[tamanhoMatriz][tamanhoMatriz];
-	};
-
-	struct params p;
-	p.matriz[tamanhoMatriz][tamanhoMatriz] = matriz;
-
-	int vencedores[2] = {0, 0};
-
-	pthread_mutex_init(&mutex, NULL);
-
-	pthread_create(&horizontal, NULL, verificaVencedorHorizontal, &p);
-	pthread_create(&vertical, NULL, verificaVencedorVertical, &p);
-
-	pthread_join(&horizontal, NULL);
-	pthread_join(&vertical, NULL);
-
-	pthread_mutex_destroy(&mutex);
-
-	printf("Vencedor Geral %d\n", vencedorGeral);
-	int i;
-	int maior = 0;
-	// for(i = 0; i < 2; i++){
-	// 	// printf("Vencedor, retorno: %d \n", vencedores[i]);
-	// 	if(vencedores[i] > maior){
-	// 		maior = vencedores[i];
-	// 	}
-	// }
-
-	return maior;
 }
 
 int main(){
@@ -197,16 +160,21 @@ int main(){
 	// a matriz tem que ter o dobro de numero de pedras
 	tamanhoMatriz *= 2;
 
-	int matriz[tamanhoMatriz][tamanhoMatriz];
+	// int matriz[tamanhoMatriz][tamanhoMatriz];
+
+	int **matriz = (int **)malloc(tamanhoMatriz * sizeof(int *));
+    for (i = 0; i < tamanhoMatriz; i++){
+        matriz[i] = (int *)malloc(tamanhoMatriz * sizeof(int));
+	}
 
 	int contaPecaTotal = tamanhoMatriz * tamanhoMatriz;
 
 	// inicializa a matriz
 	for(i = 0; i < tamanhoMatriz; i++){
-			for(j = 0; j < tamanhoMatriz; j++){
-				matriz[i][j] = 0;
-			}
+		for(j = 0; j < tamanhoMatriz; j++){
+			matriz[i][j] = 0;
 		}
+	}
 
 	// enquanto nao houver vencedor... ao menos ate implementarmos isso
 	while(vencedor < 1 && vencedorGeral < 1){
@@ -244,12 +212,35 @@ int main(){
 		// vencedor = verificaEmpate(contaPecaTotal, tamanhoMatriz, matriz, jogadorVez + 1);
 		// vencedor = verificaVencedorVertical(tamanhoMatriz, matriz, jogadorVez + 1);
 		// define proximo jogador
-		vencedor = verificaVencedor(matriz);
+		pthread_t horizontal;
+		pthread_t vertical;
+
+		// struct params {
+		// 	int matriz[tamanhoMatriz][tamanhoMatriz];
+		// };
+        //
+		// struct params p;
+		// p.matriz[tamanhoMatriz][tamanhoMatriz] = matriz;
+
+
+		pthread_mutex_init(&mutex, NULL);
+
+		pthread_create(&horizontal, NULL, verificaVencedorHorizontal, matriz);
+		pthread_create(&vertical, NULL, verificaVencedorVertical, matriz);
+
+		pthread_join(&horizontal, NULL);
+		pthread_join(&vertical, NULL);
+
+		pthread_mutex_destroy(&mutex);
+
+		printf("Vencedor Geral %d\n", vencedorGeral);
+
+
 		jogadorVez = alteraJogador(jogadorVez);
 
 		contaPecaTotal = contaPecaTotal - 1;
 
-	}
+	}//fim whiele
 	// if(verificaEmpate == 1){
 	//     printf("\nTemos um Empate! \n");
 	//     printf("Parou");
