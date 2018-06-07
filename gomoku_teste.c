@@ -1,7 +1,8 @@
-#include <pthread.h>
 #include <time.h>
 #include <math.h>
+# include <stdlib.h>
 # include <stdio.h>
+#include <pthread.h>
 
 int vencedorGeral = 0;
 int tamanhoMatriz;
@@ -26,7 +27,6 @@ int alteraJogador(int jogador){
 	return abs(jogador - 1);
 }
 
-// int verificaVencedorHorizontal(int matriz[tamanhoMatriz][tamanhoMatriz]){
 void *verificaVencedorHorizontal(void *matrizPont){
 	pthread_mutex_lock(&mutex);
 	int **matriz = (int **)matrizPont;
@@ -35,7 +35,6 @@ void *verificaVencedorHorizontal(void *matrizPont){
 	int j;
 	int count = 0;
 	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
-	int vencedor = 0;
 
 	for(i = 0; i < tamanhoMatriz; i++){
 		for(j = 0; j < tamanhoMatriz; j++){
@@ -54,20 +53,14 @@ void *verificaVencedorHorizontal(void *matrizPont){
 		}
 		count = 0;
 	}
-	// printf("Vertical, jogador vez: %d \n", jogVez);
-	// printf("Horizontal, count: %d \n", count);
-	// printf("Horizontal, NumPecas: %d \n", numPecas);
 	if(count >= numPecas){
-		vencedor = 1;
 		vencedorGeral = 1;
-		printf("Vencedor geral deveria ser alterado aqui: Horizontal\n");
 	}
 	pthread_mutex_unlock(&mutex);
 	pthread_exit(NULL);
 	return NULL;
 }
 
-// int verificaVencedorVertical(int matriz[tamanhoMatriz][tamanhoMatriz]){
 void *verificaVencedorVertical(void *matrizPont){
 	pthread_mutex_lock(&mutex);
 	int **matriz = (int **)matrizPont;
@@ -76,7 +69,6 @@ void *verificaVencedorVertical(void *matrizPont){
     int j;
     int count = 0;
     int numPecas = tamanhoMatriz / 2;
-    int vencedor = 0;
 
 	for(i = 0; i < tamanhoMatriz; i++){
 	    for(j = 0; j < tamanhoMatriz; j++){
@@ -97,13 +89,11 @@ void *verificaVencedorVertical(void *matrizPont){
 	}
 
 	if(count >= numPecas){
-		vencedor = 1;
 		vencedorGeral = 1;
-		printf("Vencedor geral deveria ser alterado aqui: Vertical\n");
 	}
 	pthread_mutex_unlock(&mutex);
 	pthread_exit(NULL);
-	return vencedor;
+	return NULL;
 }
 int verificaEmpate(int contTotalPec, int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
     int verificaEmpate;
@@ -179,8 +169,7 @@ int main(){
 	}
 
 	// enquanto nao houver vencedor... ao menos ate implementarmos isso
-	while(vencedor < 1 && vencedorGeral < 1){
-
+	while(vencedorGeral < 1){
 		// imprime a matriz na tela
 		escreveMatriz(matriz);
 
@@ -209,20 +198,8 @@ int main(){
 		// imprime o valor referente ao jogador
 		matriz[linha][coluna] = jogadorVez + 1;
 
-
-		// vencedor = verificaVencedorHorizontal(tamanhoMatriz, matriz, jogadorVez + 1);
-		// vencedor = verificaEmpate(contaPecaTotal, tamanhoMatriz, matriz, jogadorVez + 1);
-		// vencedor = verificaVencedorVertical(tamanhoMatriz, matriz, jogadorVez + 1);
-		// define proximo jogador
 		pthread_t horizontal;
 		pthread_t vertical;
-
-		// struct params {
-		// 	int matriz[tamanhoMatriz][tamanhoMatriz];
-		// };
-        //
-		// struct params p;
-		// p.matriz[tamanhoMatriz][tamanhoMatriz] = matriz;
 
 
 		pthread_mutex_init(&mutex, NULL);
@@ -230,14 +207,12 @@ int main(){
 		pthread_create(&horizontal, NULL, verificaVencedorHorizontal, matriz);
 		pthread_create(&vertical, NULL, verificaVencedorVertical, matriz);
 
-		pthread_join(&horizontal, NULL);
-		pthread_join(&vertical, NULL);
+		pthread_join(horizontal, NULL);
+		pthread_join(vertical, NULL);
 
 		pthread_mutex_destroy(&mutex);
 
-		printf("Vencedor Geral %d\n", vencedorGeral);
-
-
+		// define proximo jogador
 		jogadorVez = alteraJogador(jogadorVez);
 
 		contaPecaTotal = contaPecaTotal - 1;
