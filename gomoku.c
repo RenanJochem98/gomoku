@@ -89,32 +89,50 @@ void *verificaVencedorVertical(void *matrizPont){
 	return NULL;
 }
 
-int verificaVencDiagEsqInfParaDirSup(int tamMatriz, int matriz[tamMatriz][tamMatriz], int jogadorVez){
+void *verificaVencDiagEsqInfParaDirSup(void *matrizPont){
+	int **matriz = (int **)matrizPont;
+	int jogVez = jogadorVez + 1;
 	int i;
 	int j;
 	int count = 0;
-	int numPecas = tamMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
-	int vencedor = 0;
+	int numPecas = tamanhoMatriz / 2; //para nao precisar passar mais um argumento como parametro sempre
 
 	int primeiraLinha  = numPecas - 1;
-	int ultimaColuna = tamMatriz - (numPecas - 1);
+	int ultimaColuna = tamanhoMatriz - (numPecas - 1);
+	int linha = 0;
 	int coluna = 0;
+	i = primeiraLinha;
+	// for(i = primeiraLinha; i < tamanhoMatriz; i++){
+	while(i < tamanhoMatriz || (linha == tamanhoMatriz - 1 && coluna == tamanhoMatriz - 1)){
+		linha = i;
+		while(linha >= 0){
+			if(matriz[linha][coluna] == jogVez){
+				count++;
+			}else{
+				count = 0;
+			}
 
-	for(i = primeiraLinha; i < tamMatriz; i++){
-		int linha = i;
-		while(linha > 0 && coluna <= linha){
-			int posicao = matriz[linha][coluna];
-
-			//comparo
-			linha--;
+			if(count >= numPecas){
+				break;
+			}
 			coluna++;
+			if(linha == 0){
+				coluna = 0;
+			}
+			linha--;
+		}
+		if(count >= numPecas){
+			break;
+		}
+		// printf("Pulou\n");
+		if(linha < tamanhoMatriz - 1){
+			i++;
 		}
 	}
-
 	if(count >= numPecas){
-		vencedor = 1;
+		vencedorGeral = 1;
 	}
-	return vencedor;
+	return NULL;
 }
 
 int main(){
@@ -187,12 +205,15 @@ int main(){
 		// nao tera influencia nas outras threads
 		pthread_t horizontal;
 		pthread_t vertical;
+		pthread_t diagonal;
 
 		pthread_create(&horizontal, NULL, verificaVencedorHorizontal, matriz);
 		pthread_create(&vertical, NULL, verificaVencedorVertical, matriz);
+		pthread_create(&diagonal, NULL, verificaVencDiagEsqInfParaDirSup, matriz);
 
 		pthread_join(horizontal, NULL);
 		pthread_join(vertical, NULL);
+		pthread_join(diagonal, NULL);
 
 		// define proximo jogador
 		jogadorVez = alteraJogador(jogadorVez);
